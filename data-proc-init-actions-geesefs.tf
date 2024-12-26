@@ -1,7 +1,7 @@
 # Infrastructure for Yandex Data Processing and Yandex Object Storage with init action script
 #
-# RU: https://yandex.cloud/ru/docs/tutorials/dataplatform/data-proc-init-actions-geesefs
-# EN: https://yandex.cloud/en/docs/tutorials/dataplatform/data-proc-init-actions-geesefs
+# RU: https://yandex.cloud/ru/docs/tutorials/dataplatform/data-processing-init-actions-geesefs
+# EN: https://yandex.cloud/en/docs/tutorials/dataplatform/data-processing-init-actions-geesefs
 #
 # Specify the following settings:
 locals {
@@ -20,14 +20,14 @@ locals {
   dp_sa_name      = "" # Name of the service account  
 
   # Object Storage settings
-  dp_bucket_name = "" # Name of the Object Storage bucket
+  dp_bucket_name = "" # Name of the Yandex Object Storage bucket
 
   # Data Proc settings
-  dataproc_name = "" # Name of the Data Proc cluster  
+  dataproc_name = "" # Name of the Yandex Data Processing cluster  
   ssh_path      = "" # Path to the public SSH key file.
 
   # This setting sets the order of resource creation
-  create_cluster = 0 # Set this setting to 1 to enable creation of the Data Proc infrastructure and cluster.
+  create_cluster = 0 # Set this setting to 1 to enable creation of the Yandex Data Processing infrastructure and cluster.
 
   # The following settings are predefined. Change them only if necessary.
 
@@ -37,20 +37,20 @@ locals {
   nat_destination_prefix = "0.0.0.0/0"    # Route table destination prefix for NAT
 
   # Data Proc settings
-  dataproc_version = "2.0"                                # Version of the Data Proc cluster.
-  masternode_name  = "mastersubcluster"                   # Name of the Master node in the Data Proc cluster.
-  services         = ["SPARK", "TEZ", "YARN"]             # List of components to use in Data Proc cluster.
-  computenode_name = "computesubcluster"                  # Name of the Compute node in the Data Proc cluster.
-  bucket           = yandex_storage_bucket.data-bucket.id # ID of the bucket to use in Data Proc cluster.
+  dataproc_version = "2.0"                                # Version of the Yandex Data Processing cluster.
+  masternode_name  = "mastersubcluster"                   # Name of the Master node in the Yandex Data Processing cluster.
+  services         = ["SPARK", "TEZ", "YARN"]             # List of components to use in the Yandex Data Processing cluster.
+  computenode_name = "computesubcluster"                  # Name of the Compute node in the Yandex Data Processing cluster.
+  bucket           = yandex_storage_bucket.data-bucket.id # ID of the bucket to use in the Yandex Data Processing cluster.
 }
 
 resource "yandex_vpc_network" "mynet" {
-  description = "Network for the Data Proc cluster"
+  description = "Network for the Yandex Data Processing cluster"
   name        = local.dp_network_name
 }
 
 resource "yandex_vpc_subnet" "mysubnet" {
-  description    = "Subnet for the Data Proc cluster"
+  description    = "Subnet for the Yandex Data Processing cluster"
   name           = local.dp_subnet_name
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.mynet.id
@@ -59,7 +59,7 @@ resource "yandex_vpc_subnet" "mysubnet" {
 }
 
 resource "yandex_vpc_security_group" "my-sg" {
-  description = "Security group for the Data Proc cluster"
+  description = "Security group for theYandex Data Processing cluster"
   name        = local.dp_sg_name
   network_id  = yandex_vpc_network.mynet.id
 
@@ -71,7 +71,7 @@ resource "yandex_vpc_security_group" "my-sg" {
   }
 
   ingress {
-    description    = "This rule allows to connect to the Data Proc cluster host via SSH"
+    description    = "This rule allows to connect to the Yandex Data Processing cluster host via SSH"
     protocol       = "TCP"
     v4_cidr_blocks = ["0.0.0.0/0"]
     port           = 22
@@ -124,7 +124,7 @@ resource "yandex_vpc_route_table" "route-table-for-nat" {
 }
 
 resource "yandex_iam_service_account" "data-proc-sa" {
-  description = "Service account for the Data Proc cluster and Object Storage bucket"
+  description = "Service account for the Yandex Data Processing cluster and the Yandex Object Storage bucket"
   name        = local.dp_sa_name
 }
 
@@ -147,7 +147,7 @@ resource "yandex_resourcemanager_folder_iam_member" "sa-editor" {
 }
 
 resource "yandex_iam_service_account_static_access_key" "sa-static-key" {
-  description        = "Static key for managing Object Storage bucket"
+  description        = "Static key for managing the Yandex Object Storage bucket"
   service_account_id = yandex_iam_service_account.data-proc-sa.id
 }
 
@@ -162,7 +162,7 @@ resource "yandex_storage_bucket" "data-bucket" {
 }
 
 resource "yandex_dataproc_cluster" "data_cluster" {
-  description        = "Data Proc cluster"
+  description        = "Yandex Data Processing cluster"
   name               = local.dataproc_name
   bucket             = local.bucket
   count              = local.create_cluster
