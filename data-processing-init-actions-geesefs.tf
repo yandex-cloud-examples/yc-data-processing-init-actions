@@ -163,6 +163,7 @@ resource "yandex_storage_bucket" "data-bucket" {
 
 resource "yandex_dataproc_cluster" "data_cluster" {
   description        = "Yandex Data Processing cluster"
+  environment        = "PRODUCTION"
   name               = local.dataproc_name
   bucket             = local.bucket
   count              = local.create_cluster
